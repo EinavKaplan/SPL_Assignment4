@@ -60,8 +60,11 @@ class _Employees:
         c.execute("""
             SELECT id, name, salary, coffee_stand FROM Employees WHERE id = ?
         """, [employee_id])
-
-        return Employee(*c.fetchone())
+        out = c.fetchone()
+        if out is not None:
+            return Employee(*out)
+        else:
+            return None
 
     def find_all(self):
         c = self._conn.cursor()
@@ -86,8 +89,11 @@ class _Suppliers:
         c.execute("""
                 SELECT id, name, contact_information FROM Suppliers WHERE id = ?
             """, [supplier_id])
-
-        return Supplier(*c.fetchone())
+        out = c.fetchone()
+        if out is not None:
+            return Supplier(*out)
+        else:
+            return None
 
     def find_all(self):
         c = self._conn.cursor()
@@ -125,7 +131,7 @@ class _Products:
 
     def update_quantity(self, product):
         self._conn.execute("""
-            UPDATE Products SET Products.quantity = ? WHERE Products.id = ?
+            UPDATE Products SET quantity = ? WHERE id = ?
         """, (product.quantity, product.id))
 
 
@@ -135,8 +141,8 @@ class _Coffee_stands:
 
     def insert(self, coffee_stand):
         self._conn.execute("""
-               INSERT INTO Coffee_stands (id, location, number_of_employees) VALUES (?, ?, ?)
-           """, [coffee_stand.id, coffee_stand.location, coffee_stand.number_of_employees])
+               INSERT INTO Coffee_stands(id, location, number_of_employees) VALUES (?, ?, ?)
+           """, (coffee_stand.id, coffee_stand.location, coffee_stand.number_of_employees))
 
     def find(self, coffee_stand_id):
         c = self._conn.cursor()
@@ -144,12 +150,12 @@ class _Coffee_stands:
                SELECT id, location, number_of_employees FROM Coffee_stands WHERE id = ?
            """, [coffee_stand_id])
 
-        return Product(*c.fetchone())
+        return Coffee_stand(*c.fetchone())
 
     def find_all(self):
         c = self._conn.cursor()
         all = c.execute("""
-                  SELECT pid, location, number_of_employees FROM Coffee_stands
+                  SELECT id, location, number_of_employees FROM Coffee_stands
               """).fetchall()
 
         return [Coffee_stand(*row) for row in all]
@@ -188,11 +194,10 @@ class _Repository(object):
         self._conn.close()
 
     def create_tables(self):
-        database_existed = os.path.isfile('moncafe.db')
-        if database_existed:
-            os.remove('moncafe.db')
-            self._conn = sqlite3.connect('moncafe.db')
-
+        if os.path.isfile("moncafe.db"):
+            self.close()
+            os.remove("moncafe.db")
+            self.__init__()
         self._conn.executescript("""
                 CREATE TABLE Employees (
                     id  INTEGER PRIMARY KEY,
@@ -209,15 +214,15 @@ class _Repository(object):
                 
                 CREATE TABLE Products (
                     id  INTEGER PRIMARY KEY,
-                    Products    TEXT    NOT NULL,
+                    description    TEXT    NOT NULL,
                     price   REAL    NOT NULL,
-                    quantity    INTEGER NOT NULL,
+                    quantity    INTEGER NOT NULL
                 );
                 
                 CREATE TABLE Coffee_stands (
                     id  INTEGER PRIMARY KEY,
                     location    TEXT    NOT NULL,
-                    number_of_employees INTEGER,
+                    number_of_employees INTEGER
                 );
                 
                 CREATE TABLE Activities (
@@ -231,4 +236,4 @@ class _Repository(object):
 
 # the repository singleton
 repo = _Repository()
-atexit.register(repo.close())
+atexit.register(repo.close)

@@ -2,15 +2,19 @@
 from Persistence import *
 import sys
 
+
 repo.create_tables()
-config_file = sys.argv
-with open(config_file):
-    for rec in config_file:
-        if rec[0] == 'E':
-            repo.employees.insert(Employee(*rec[1:]))
-        elif rec[0] == 'S':
-            repo.suppliers.insert(Supplier(*rec[1:]))
-        elif rec[0] == 'P':
-            repo.products.insert(Product(*rec[1:], 0))
-        elif rec[0] == 'C':
-            repo.coffee_stands.insert(Coffee_stand(*rec[1:]))
+args = sys.argv
+config_file = args[1]
+with open(config_file) as data:
+    for rec in data:
+        row = rec.split(', ')
+        row[len(row)-1] = row[len(row)-1][0:len( row[len(row)-1])-1]
+        if row[0] == 'E':
+            repo.employees.insert(Employee(row[1], row[2], row[3], row[4]))
+        elif row[0] == 'S':
+            repo.suppliers.insert(Supplier(row[1], row[2], row[3]))
+        elif row[0] == 'P':
+            repo.products.insert(Product(row[1], row[2], row[3],0))
+        elif row[0] == 'C':
+            repo.coffee_stands.insert(Coffee_stand(row[1], row[2], row[3]))

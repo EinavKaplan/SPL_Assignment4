@@ -6,76 +6,74 @@ from Persistence import *
 def print_activities():
     print('Activities')
     activities = repo.activities.find_all()
-    for row in activities:
-        print(row)
+    for a in activities:
+        print("("+str(a.product_id)+", "+str(a.quantity)+", "+str(a.activator_id)+", "+str(a.date)+")")
 
 
 # print Coffee_stand by id
 def print_coffee_stands():
     print('Coffee stands')
     coffee_stands = repo.coffee_stands.find_all()
-    for row in coffee_stands:
-        print(row)
+    for coffee in coffee_stands:
+        print("("+str(coffee.id)+", '"+coffee.location+"', "+str(coffee.number_of_employees)+")")
 
 
 # print Employees by id
 def print_employees():
     print('Employees')
     employees = repo.employees.find_all()
-    for row in employees:
-        print(row)
+    for e in employees:
+        print("("+str(e.id)+", '"+e.name+"', "+str(e.salary)+", "+str(e.coffee_stand)+")")
 
 
 # print Products by id
 def print_products():
     print('Products')
     products = repo.products.find_all()
-    for row in products:
-        print(row)
+    for p in products:
+        print("("+str(p.id)+", '"+p.description+"', "+str(p.price)+", "+str(p.quantity)+")")
 
 
 # print Suppliers by id
 def print_suppliers():
     print('Suppliers')
     suppliers = repo.suppliers.find_all()
-    for row in suppliers:
-        print(row)
+    for s in suppliers:
+        print("("+str(s.id)+", '"+s.name+"', '"+s.contact_information+"')")
 
 
 def print_employee_report():
     print('Employees report')
     # Name, Salary, Working location, total sales income.
     employees = repo.employees.find_all()
-    for row in employees:
-        coffee_stand = repo.coffee_stands.find(row[3])
-        sales_income = find_sales_income(row[0])
-        print(row[1]+" "+row[2]+" "+coffee_stand[1]+" "+sales_income)
+    for e in employees:
+        coffee_stand = repo.coffee_stands.find(e.coffee_stand)
+        sales_income = find_sales_income(e.id)
+        print(e.name+" "+str(e.salary)+" "+coffee_stand.location+" "+str(sales_income))
 
 
 def find_sales_income(employee_id):
     activities = repo.activities.find_all()
     total = 0
-    for row in activities:
-        # row[0]=product_id row[1]=quantity row[2] = activator id
-        if row[2] == employee_id:
-            product = repo.products.find(row[0])
-            # product[2] = product price
-            total = total + (-row[1])*product[2]
+    for a in activities:
+        if a.activator_id == employee_id:
+            product = repo.products.find(a.product_id)
+            total = total + (-a.quantity)*product.price
     return total
 
 
 def print_activities_report():
     activities = repo.activities.find_all()
     if len(activities) > 0:
-        for row in activities:
-            product = repo.products.find(row[0])
-            # date of activity, item description, quantity, name of seller and the name of the supplier
-            employee = repo.employees.find(row[2])
-            supplier = repo.suppliers.find(row[2])
-            if len(employee) > 0:
-                print(row[3]+", "+product[1]+", "+row[1]+", "+employee[1]+", None")
+        print('Activities')
+        for a in activities:
+            product = repo.products.find(a.product_id)
+            employee = repo.employees.find(a.activator_id)
+            supplier = repo.suppliers.find(a.activator_id)
+            if employee is not None:
+                print("("+str(a.date)+", '"+product.description+"', "+str(a.quantity)+", '"+employee.name+"', None)")
             else:
-                print(row[3]+", "+product[1]+", "+row[1]+", None, "+supplier[1])
+                print("("+str(a.date)+", '"+product.description+"', "+str(a.quantity)+", None, '"+supplier.name+"')")
 
 
 def print_all():
@@ -84,8 +82,11 @@ def print_all():
     print_employees()
     print_products()
     print_suppliers()
+    print('')
     print_employee_report()
+    print('')
     print_activities_report()
 
 
-print_all()
+if __name__ == '__main__':
+    print_all()
