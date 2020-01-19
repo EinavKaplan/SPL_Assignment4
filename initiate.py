@@ -1,4 +1,4 @@
-# file: initiate
+# file: initiate.py
 from Persistence import *
 import sys
 
@@ -11,6 +11,6 @@ with open(config_file):
         elif rec[0] == 'S':
             repo.suppliers.insert(Supplier(*rec[1:]))
         elif rec[0] == 'P':
-            repo.products.insert(Product(*rec[1:]))
+            repo.products.insert(Product(*rec[1:], 0))
         elif rec[0] == 'C':
             repo.coffee_stands.insert(Coffee_stand(*rec[1:]))

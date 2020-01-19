@@ -4,6 +4,7 @@ import sqlite3
 import atexit
 import os
 
+
 # Data Transfer Objects:
 class Employee(object):
     def __init__(self, id, name, salary, coffee_stand):
@@ -21,10 +22,11 @@ class Supplier(object):
 
 
 class Product(object):
-    def __init__(self, id, description, price):
+    def __init__(self, id, description, price, quantity):
         self.id = id
         self.description = description
         self.price = price
+        self.quantity = quantity
 
 
 class Coffee_stand(object):
@@ -69,6 +71,7 @@ class _Employees:
 
         return [Employee(*row) for row in all]
 
+
 class _Suppliers:
     def __init__(self, conn):
         self._conn = conn
@@ -101,13 +104,13 @@ class _Products:
 
     def insert(self, product):
         self._conn.execute("""
-            INSERT INTO Products (id, description, price) VALUES (?, ?, ?)
-        """, [product.id, product.description, product.price])
+            INSERT INTO Products (id, description, price, quantity) VALUES (?, ?, ?, ?)
+        """, [product.id, product.description, product.price, product.quantity])
 
     def find(self, product_id):
         c = self._conn.cursor()
         c.execute("""
-            SELECT id, description, price FROM Products WHERE id = ?
+            SELECT id, description, price, quantity FROM Products WHERE id = ?
         """, [product_id])
 
         return Product(*c.fetchone())
@@ -115,10 +118,15 @@ class _Products:
     def find_all(self):
         c = self._conn.cursor()
         all = c.execute("""
-                  SELECT id, description, price FROM Products
+                  SELECT id, description, price, quantity FROM Products
               """).fetchall()
 
         return [Product(*row) for row in all]
+
+    def update_quantity(self, product):
+        self._conn.execute("""
+            UPDATE Products SET Products.quantity = ? WHERE Products.id = ?
+        """, (product.quantity, product.id))
 
 
 class _Coffee_stands:
