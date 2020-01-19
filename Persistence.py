@@ -2,6 +2,7 @@
 
 import sqlite3
 import atexit
+import os
 
 # Data Transfer Objects:
 class Employee(object):
@@ -120,7 +121,6 @@ class _Products:
         return [Product(*row) for row in all]
 
 
-
 class _Coffee_stands:
     def __init__(self, conn):
         self._conn = conn
@@ -168,21 +168,23 @@ class _Activities:
 # The Repository
 class _Repository(object):
     def __init__(self):
-        #shira
-        self._conn = sqlite3.connect('grades.db')
-
+        self._conn = sqlite3.connect('moncafe.db')
         self.employees = _Employees(self._conn)
         self.suppliers = _Suppliers(self._conn)
         self.products = _Products(self._conn)
         self.coffee_stands = _Coffee_stands(self._conn)
         self.activities = _Activities(self._conn)
 
-
-    def _close(self):
+    def close(self):
         self._conn.commit()
         self._conn.close()
 
     def create_tables(self):
+        database_existed = os.path.isfile('moncafe.db')
+        if database_existed:
+            os.remove('moncafe.db')
+            self._conn = sqlite3.connect('moncafe.db')
+
         self._conn.executescript("""
                 CREATE TABLE Employees (
                     id  INTEGER PRIMARY KEY,
@@ -221,4 +223,4 @@ class _Repository(object):
 
 # the repository singleton
 repo = _Repository()
-atexit.register(repo._close)
+atexit.register(repo.close())
