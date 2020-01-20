@@ -8,7 +8,7 @@ config_file = args[1]
 with open(config_file) as data:
     for rec in data:
         rec = rec.split(', ')
-        rec[len(rec) - 1] = rec[len(rec) - 1][0:len(rec[len(rec) - 1]) - 1]
+        rec[len(rec) - 1] = rec[len(rec) - 1].replace("\n", "")
         if int(rec[1]) > 0:
             repo.activities.insert(Activity(rec[0], rec[1], rec[2], rec[3]))
             product = repo.products.find(rec[0])

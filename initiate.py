@@ -9,7 +9,7 @@ config_file = args[1]
 with open(config_file) as data:
     for rec in data:
         row = rec.split(', ')
-        row[len(row)-1] = row[len(row)-1][0:len( row[len(row)-1])-1]
+        row[len(row)-1] = row[len(row)-1].replace("\n", "")
         if row[0] == 'E':
             repo.employees.insert(Employee(row[1], row[2], row[3], row[4]))
         elif row[0] == 'S':

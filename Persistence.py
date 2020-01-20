@@ -173,7 +173,7 @@ class _Activities:
     def find_all(self):
         c = self._conn.cursor()
         all = c.execute("""
-               SELECT product_id, quantity, activator_id, date FROM Activities
+               SELECT product_id, quantity, activator_id, date FROM Activities ORDER BY date
            """).fetchall()
 
         return [Activity(*row) for row in all]
