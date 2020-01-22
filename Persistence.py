@@ -44,6 +44,23 @@ class Activity(object):
         self.date = date
 
 
+class ReportActivities(object):
+    def __init__(self, date, item_description, quantity, seller_name, supplier_name):
+        self.date = date
+        self.item_description = item_description
+        self.quantity = quantity
+        self.seller_name = seller_name
+        self.supplier_name = supplier_name
+
+
+class ReportEmployees(object):
+    def __init__(self, name, salary, working_location, total_sales_income):
+        self.name = name
+        self.salary = salary
+        self.working_location = working_location
+        self.total_sales_income = total_sales_income
+
+
 # Data Access Objects:
 # All of these are meant to be singletons
 class _Employees:
@@ -179,6 +196,40 @@ class _Activities:
         return [Activity(*row) for row in all]
 
 
+class _ReportActivities:
+    def __init__(self, conn):
+        self._conn = conn
+
+    def find_all(self):
+        c = self._conn.cursor()
+        all = c.execute("""
+        SELECT Activities.date, Products.description, Activities.quantity, Employees.name, Suppliers.name
+         FROM ((Activities JOIN Products on Activities.product_id = Products.id) 
+         LEFT JOIN Employees on Activities.activator_id = Employees.id) 
+         LEFT JOIN Suppliers on Activities.activator_id = Suppliers.id
+         ORDER BY Activities.date
+         """).fetchall()
+
+        return [ReportActivities(*row) for row in all]
+
+
+class _ReportEmployees:
+    def __init__(self, conn):
+        self._conn = conn
+
+    def find_all(self):
+        c = self._conn.cursor()
+        all = c.execute("""
+        SELECT Employees.name, Employees.salary, Coffee_stands.location, sum((-Activities.quantity) * Products.price)
+        FROM ((Employees JOIN Coffee_stands on Employees.coffee_stand = Coffee_stands.id) LEFT JOIN Activities 
+        on Employees.id = Activities.activator_id) LEFT JOIN Products on Activities.product_id = Products.id
+        GROUP BY Employees.id
+        ORDER BY Employees.name
+        """).fetchall()
+
+        return [ReportEmployees(*row) for row in all]
+
+
 # The Repository
 class _Repository(object):
     def __init__(self):
@@ -188,6 +239,8 @@ class _Repository(object):
         self.products = _Products(self._conn)
         self.coffee_stands = _Coffee_stands(self._conn)
         self.activities = _Activities(self._conn)
+        self.report_activities = _ReportActivities(self._conn)
+        self.report_employees = _ReportEmployees(self._conn)
 
     def close(self):
         self._conn.commit()

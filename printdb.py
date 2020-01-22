@@ -44,36 +44,25 @@ def print_suppliers():
 
 def print_employee_report():
     print('Employees report')
-    # Name, Salary, Working location, total sales income.
-    employees = repo.employees.find_all()
-    for e in employees:
-        coffee_stand = repo.coffee_stands.find(e.coffee_stand)
-        sales_income = find_sales_income(e.id)
-        print(e.name+" "+str(e.salary)+" "+coffee_stand.location+" "+str(sales_income))
-
-
-def find_sales_income(employee_id):
-    activities = repo.activities.find_all()
-    total = 0
-    for a in activities:
-        if a.activator_id == employee_id:
-            product = repo.products.find(a.product_id)
-            total = total + (-a.quantity)*product.price
-    return total
+    reports = repo.report_employees.find_all()
+    for r in reports:
+        if r.total_sales_income is not None:
+            print(r.name + " " + str(r.salary) + " " + r.working_location + " " + str(r.total_sales_income))
+        else:
+            print(r.name + " " + str(r.salary) + " " + r.working_location + " 0")
 
 
 def print_activities_report():
-    activities = repo.activities.find_all()
-    if len(activities) > 0:
+    reports = repo.report_activities.find_all()
+    if reports:
         print('Activities')
-        for a in activities:
-            product = repo.products.find(a.product_id)
-            employee = repo.employees.find(a.activator_id)
-            supplier = repo.suppliers.find(a.activator_id)
-            if employee is not None:
-                print("("+str(a.date)+", '"+product.description+"', "+str(a.quantity)+", '"+employee.name+"', None)")
-            else:
-                print("("+str(a.date)+", '"+product.description+"', "+str(a.quantity)+", None, '"+supplier.name+"')")
+    for r in reports:
+        if r.seller_name is not None:
+            print("(" + str(r.date) + ", '" + r.item_description + "', " + str(r.quantity) + ", '" + r.seller_name
+                  + "', None)")
+        else:
+            print("(" + str(r.date) + ", '" + r.item_description + "', " + str(r.quantity) + ", None, '"
+                  + r.supplier_name + "')")
 
 
 def print_all():
